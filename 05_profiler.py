@@ -73,9 +73,20 @@ prof_decode.export_chrome_trace("results/trace_decode_heavy.json")
 print("\nTraces saved. Open in chrome://tracing")
 
 # ── Key finding ───────────────────────────────────────────────────────────────
-print("""
-KEY FINDING:
-  Decode-heavy CPU time / CUDA time ratio ≈ 7:1
-  The H100 is idle 85% of decode time waiting for Python kernel dispatch.
-  This is why vLLM achieves 3x speedup — C++ scheduler eliminates this overhead.
+# ── Auto-compute and print key finding from actual profiler output ────────────
+cpu_prefill_ms  = sum(e.cpu_time_total for e in prof_prefill.key_averages()) / 1000
+cuda_prefill_ms = sum(e.cuda_time_total for e in prof_prefill.key_averages()) / 1000
+cpu_decode_ms   = sum(e.cpu_time_total  for e in prof_decode.key_averages())  / 1000
+cuda_decode_ms  = sum(e.cuda_time_total for e in prof_decode.key_averages())  / 1000
+
+ratio_prefill = cpu_prefill_ms  / cuda_prefill_ms  if cuda_prefill_ms  else 0
+ratio_decode  = cpu_decode_ms   / cuda_decode_ms   if cuda_decode_ms   else 0
+idle_pct      = (1 - cuda_decode_ms / cpu_decode_ms) * 100 if cpu_decode_ms else 0
+
+print(f"""
+KEY FINDING (measured):
+  Prefill-heavy CPU/CUDA ratio: {ratio_prefill:.2f}x
+  Decode-heavy  CPU/CUDA ratio: {ratio_decode:.2f}x
+  H100 idle ~{idle_pct:.0f}% of decode time (Python kernel dispatch overhead)
+  This CPU-bound bottleneck is what vLLM's C++ scheduler eliminates.
 """)
