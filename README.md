@@ -2,8 +2,6 @@
 
 Benchmarking Mistral-7B-Instruct-v0.3 across two inference stacks on NVIDIA H100 80GB HBM3, with PyTorch profiler analysis identifying the root cause of HuggingFace's performance ceiling.
 
-![Benchmark Charts](results/benchmark_charts.png)
-
 ---
 
 ## Results Summary
