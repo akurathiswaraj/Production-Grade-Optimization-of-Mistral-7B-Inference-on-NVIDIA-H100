@@ -71,7 +71,6 @@ Top kernel both cases: `aten::mm` (~71% of CUDA time)
     ├── vllm_batch_sweep.csv
     ├── trace_prefill_heavy.json
     ├── trace_decode_heavy.json
-    └── benchmark_charts.png
 ```
 
 ---
